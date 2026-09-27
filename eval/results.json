@@ -1,0 +1,68 @@
+{
+  "generated_at": "2026-09-26T19:00:54",
+  "test_set": "data/splits/test.jsonl (16 rows)",
+  "config": {
+    "similarity": "tfidf",
+    "classifier": false,
+    "judge": false
+  },
+  "full_system": {
+    "precision": 1.0,
+    "recall": 0.875,
+    "f1": 0.933,
+    "fpr_all_clean": 0.0,
+    "fpr_hard_negatives": 0.0,
+    "n": 16,
+    "n_hard_negatives": 4
+  },
+  "ablation": [
+    {
+      "configuration": "Full system",
+      "precision": 1.0,
+      "recall": 0.875,
+      "f1": 0.933,
+      "fpr_hard_negatives": 0.0
+    },
+    {
+      "configuration": "Rules only",
+      "precision": 1.0,
+      "recall": 0.75,
+      "f1": 0.857,
+      "fpr_hard_negatives": 0.0
+    },
+    {
+      "configuration": "Similarity only",
+      "precision": 0.727,
+      "recall": 1.0,
+      "f1": 0.842,
+      "fpr_hard_negatives": 0.5
+    },
+    {
+      "configuration": "Without rules",
+      "precision": 0.727,
+      "recall": 1.0,
+      "f1": 0.842,
+      "fpr_hard_negatives": 0.5
+    },
+    {
+      "configuration": "Without similarity",
+      "precision": 1.0,
+      "recall": 0.75,
+      "f1": 0.857,
+      "fpr_hard_negatives": 0.0
+    }
+  ],
+  "hidden_variant_recall": 1.0,
+  "attack_success_rate": {
+    "episodes": 7,
+    "effective_without_shield": 7,
+    "brain": "simulated",
+    "without_shield": 1.0,
+    "with_shield": 0.0,
+    "gate_only": 0.0
+  },
+  "latency_ms": {
+    "median": 1.1,
+    "p95": 1.5
+  }
+}

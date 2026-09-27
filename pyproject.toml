@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "promptshield"
+version = "0.9.0"
+description = "A two-checkpoint firewall for AI agents: scan untrusted content going in, hold risky actions coming out."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [{ name = "Team Goats (ASYNC'26)" }]
+dependencies = [
+  "beautifulsoup4>=4.12",
+  "numpy>=1.26",
+  "pydantic>=2.5",
+  "PyYAML>=6.0",
+  "requests>=2.31",
+  "scikit-learn>=1.3",
+]
+
+[project.optional-dependencies]
+ml = ["torch>=2.2", "transformers>=4.44", "sentence-transformers>=3.0"]
+api = ["fastapi>=0.110", "uvicorn>=0.29"]
+dashboard = ["streamlit>=1.35"]
+dev = ["pytest>=8.0", "httpx>=0.27"]
+
+[tool.setuptools]
+packages = ["promptshield", "promptshield.signals"]
+
+[tool.setuptools.package-data]
+promptshield = ["signals/patterns.yaml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

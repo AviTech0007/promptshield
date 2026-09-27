@@ -1,0 +1,12 @@
+# Optional ML requirements: turn on the full-strength signals.
+#   - sentence-transformers -> embedding similarity (all-MiniLM-L6-v2)
+#   - transformers + torch  -> injection classifier (Prompt Guard 2 / ProtectAI DeBERTa v2)
+# Install AFTER requirements.txt:  pip install -r requirements-ml.txt
+# On a laptop without an NVIDIA GPU, install the CPU build of torch first to save ~2 GB:
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+# Once everything works, run `pip freeze > requirements-lock.txt` and commit it,
+# so judges get exactly your versions.
+torch>=2.2
+transformers>=4.44
+sentence-transformers>=3.0
+datasets>=2.20

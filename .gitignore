@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+*.egg-info/
+.pytest_cache/
+# runtime state (recreated automatically)
+runtime/
+# downloaded datasets (re-download with scripts/download_datasets.py)
+data/raw/*
+!data/raw/.gitkeep
+# model caches
+.cache/

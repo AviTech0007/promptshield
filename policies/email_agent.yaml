@@ -1,0 +1,41 @@
+# Action-gate policy for the demo email agent.
+# Every tool the agent can call must be listed. Unknown tools fall back to `default_risk`.
+#
+# risk levels:
+#   low       - only reads data. Always allowed (still logged).
+#   medium    - changes something reversible. Allowed unless an argument is tainted.
+#   high      - sends data out or destroys it. Held for a human if an argument is tainted
+#               OR flagged content is in the conversation. Blocked outright if the tainted
+#               argument came from quarantined content.
+#   critical  - money, credentials, code execution. Always needs a human.
+#
+# watch_args:  arguments that name a destination (who/where data goes). These get the taint check.
+# bulk_args:   arguments that make an action affect many items (e.g. count, all).
+
+default_risk: high
+
+tools:
+  read_inbox:     { risk: low }
+  read_email:     { risk: low }
+  search_email:   { risk: low }
+  summarize:      { risk: low }
+  draft_reply:    { risk: medium, watch_args: [to] }
+  label_email:    { risk: medium }
+  send_email:     { risk: high, watch_args: [to, cc, bcc] }
+  forward_email:  { risk: high, watch_args: [to], bulk_args: [count] }
+  delete_email:   { risk: high, bulk_args: [count, all] }
+  http_request:   { risk: high, watch_args: [url] }
+  make_payment:   { risk: critical, watch_args: [account, upi_id] }
+  run_code:       { risk: critical }
+
+# Values the user trusts even if they also appear in an email
+# (the demo company's own staff; add the team's real contacts when you customise it).
+trusted_values:
+  - hr@acme.example
+  - finance@acme.example
+  - it-support@acme.example
+  - priya@acme.example
+  - acme.example
+
+# A bulk action above this size is treated as needing approval when untrusted content is present.
+bulk_threshold: 5

@@ -1,0 +1,87 @@
+# Rule library for Signal 1 (heuristics).
+# Each rule: id, regex (case-insensitive), weight 0..1, and a plain-English reason shown to users.
+# Scores from matching rules are combined with "noisy-OR": 1 - (1-w1)(1-w2)...
+# so several weak hits add up, but no single weak hit dominates.
+#
+# standalone: false  -> a "context" rule: words like "urgent" or "don't tell anyone" are common in
+#                      genuine emails, so alone it counts half; it gets full weight only when
+#                      another rule also matches the same sentence.
+#
+# HOW TO ADD A RULE: add an entry, then add a test in tests/test_heuristics.py
+# with one sentence that should match and one tricky genuine sentence that should NOT.
+
+rules:
+  # ---- trying to override the agent's instructions -------------------------------
+  - id: override_previous
+    regex: '\b(ignore|disregard|forget|override|bypass)\b.{0,40}\b(previous|prior|above|earlier|all|your|the)\b.{0,25}\b(instructions?|prompts?|rules|directions|guidelines|context)\b'
+    weight: 0.85
+    reason: "Tries to cancel the agent's existing instructions"
+
+  - id: new_instructions
+    regex: '\b(new|updated|real|actual|true)\s+(instructions?|task|objective|system prompt)\b'
+    weight: 0.55
+    standalone: false
+    reason: "Claims to give the agent new instructions"
+
+  - id: fake_role_tag
+    regex: '(^|\n|[\[<])\s*(system|assistant)\s*(:|\]|>)|<\|?im_start\|?>|<\|?(system|endoftext)\|?>|\[INST\]|###\s*(system|instruction)'
+    weight: 0.75
+    reason: "Contains a fake chat-role marker (e.g. 'system:')"
+
+  - id: persona_switch
+    regex: '\byou\s+are\s+now\b|\bact\s+as\b.{0,30}\b(admin|developer|system|unrestricted)\b|\bfrom\s+now\s+on\b'
+    weight: 0.5
+    reason: "Tries to change who the agent thinks it is"
+
+  # ---- addressing the AI directly ------------------------------------------------
+  - id: addresses_ai
+    regex: '(^|[.!?\n]\s*)(dear\s+|hey\s+|hi\s+|please,?\s+)?(the\s+)?(ai\s+)?(ai|llm|language model|assistant|agent|chatbot|copilot|gpt|claude|gemini|model)\b\s*[,:;-]|\b(note|message|instruction)s?\s+(to|for)\s+(the\s+)?(ai|assistant|agent|model|llm)\b|\bif you are an? (ai|assistant|language model|agent)\b'
+    weight: 0.6
+    reason: "Speaks directly to an AI rather than to the human reader"
+
+  # ---- secrecy -----------------------------------------------------------------
+  - id: secrecy
+    regex: "\\b(do not|don'?t|never)\\s+(tell|inform|mention|reveal|show|notify|alert)\\b.{0,30}\\b(user|human|anyone|recipient|owner)\\b|\\bwithout\\s+(telling|informing|notifying|asking)\\b.{0,20}\\b(user|them|anyone)\\b|\\b(silently|secretly|quietly)\\b"
+    weight: 0.7
+    standalone: false
+    reason: "Asks for something to be hidden from the user"
+
+  # ---- actions an attacker wants ------------------------------------------------
+  - id: bulk_exfiltration
+    regex: '\b(forward|send|email|share|upload|post|copy|export)\b.{0,40}\b(all|every|last\s+\d+|entire|previous|recent)\b.{0,25}\b(emails?|messages?|mail|inbox|files?|documents?|contacts?|conversations?|history|data)\b'
+    weight: 0.7
+    reason: "Asks to send many emails/files somewhere"
+
+  - id: credential_request
+    regex: '\b(password|passcode|api[\s_-]?key|secret\s+key|access\s+token|otp|2fa code|credentials?|private\s+key)\b.{0,40}\b(send|forward|reply|share|include|paste|to)\b|\b(send|forward|share|include)\b.{0,40}\b(password|api[\s_-]?key|access\s+token|credentials?|otp)\b'
+    weight: 0.65
+    standalone: false
+    reason: "Asks for passwords, keys or codes to be shared"
+
+  - id: destructive_action
+    regex: '\b(delete|erase|wipe|remove|purge)\b.{0,20}\b(all|every|entire)\b.{0,20}\b(emails?|messages?|files?|records?|inbox|data)\b'
+    weight: 0.6
+    reason: "Asks to delete data in bulk"
+
+  - id: payment_action
+    regex: '\b(transfer|wire|pay|send)\b.{0,25}(₹|rs\.?|inr|\$|usd|eur|\d{3,})|\b(update|change)\b.{0,20}\b(bank|account)\s+(details|number)\b'
+    weight: 0.45
+    standalone: false
+    reason: "Asks for money to be moved or bank details changed"
+
+  - id: data_url_exfil
+    regex: '!\[[^\]]*\]\(https?://[^)]*\?[^)]*\)|https?://[^\s]*\{[^}]+\}'
+    weight: 0.6
+    reason: "Link or image designed to carry data out in its URL"
+
+  - id: run_code
+    regex: '\b(run|execute|eval)\b.{0,20}\b(this|the following)\b.{0,15}\b(code|command|script|shell|python|bash)\b|\bcurl\s+https?://|\bwget\s+https?://'
+    weight: 0.55
+    reason: "Asks the agent to run code or commands"
+
+  # ---- urgency often used to rush the agent ------------------------------------
+  - id: urgent_imperative
+    regex: '\b(immediately|right now|urgent(ly)?|without delay|asap)\b.{0,40}\b(forward|send|delete|transfer|execute|reply|share)\b'
+    weight: 0.3
+    standalone: false
+    reason: "Urgent command to take an action"

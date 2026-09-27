@@ -1,0 +1,14 @@
+# Core requirements: enough to run the whole project with the fast signals
+# (rules + TF-IDF similarity), the action gate, the demo agent, the API and the dashboard.
+# Versions below are the ones this project was tested with.
+beautifulsoup4==4.14.3
+numpy==2.4.4
+pydantic==2.13.3
+PyYAML==6.0.3
+requests==2.33.1
+scikit-learn==1.8.0
+fastapi==0.141.1
+uvicorn==0.46.0
+streamlit==1.64.0
+pytest==9.1.1
+httpx==0.28.1
